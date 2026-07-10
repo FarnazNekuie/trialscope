@@ -1,0 +1,44 @@
+[
+  {
+    "feature": "word_count",
+    "completed_mean": 195.537,
+    "terminated_mean": 259.506,
+    "p_value": 7.720204879428137e-75,
+    "significant": "***"
+  },
+  {
+    "feature": "num_inclusion",
+    "completed_mean": 4.645,
+    "terminated_mean": 5.811,
+    "p_value": 3.225080063046801e-50,
+    "significant": "***"
+  },
+  {
+    "feature": "num_exclusion",
+    "completed_mean": 7.309,
+    "terminated_mean": 9.582,
+    "p_value": 1.2432537270995532e-64,
+    "significant": "***"
+  },
+  {
+    "feature": "has_biomarker",
+    "completed_mean": 0.209,
+    "terminated_mean": 0.326,
+    "p_value": 6.64204141136381e-51,
+    "significant": "***"
+  },
+  {
+    "feature": "has_performance",
+    "completed_mean": 0.022,
+    "terminated_mean": 0.063,
+    "p_value": 1.1934810125098985e-39,
+    "significant": "***"
+  },
+  {
+    "feature": "has_lab_values",
+    "completed_mean": 0.701,
+    "terminated_mean": 0.771,
+    "p_value": 1.4692982159069358e-16,
+    "significant": "***"
+  }
+]

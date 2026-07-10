@@ -1,10 +1,10 @@
 {
-  "date": "2026-07-10T08:03:07.257925",
+  "date": "2026-07-10T22:32:48.315672",
   "model": "GradientBoostingClassifier",
-  "auc_test": 0.831,
-  "auc_cv_mean": 0.8402,
-  "auc_cv_std": 0.0064,
-  "accuracy": 0.9224,
+  "auc_test": 0.8424,
+  "auc_cv_mean": 0.8392,
+  "auc_cv_std": 0.004,
+  "accuracy": 0.922,
   "n_trials": 25438,
   "n_features": 11,
   "top_3_features": [
