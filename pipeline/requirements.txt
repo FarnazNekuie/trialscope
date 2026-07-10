@@ -1,0 +1,8 @@
+apache-airflow-providers-postgres==5.10.0
+apache-airflow-providers-redis==3.6.0
+requests==2.31.0
+psycopg2-binary==2.9.9
+pydantic==2.6.4
+tenacity==8.2.3
+tqdm==4.66.2
+python-dotenv==1.0.1

@@ -1,0 +1,190 @@
+version: "3.9"
+
+x-airflow-common: &airflow-common
+  build: ./pipeline
+  environment:
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASS}@postgres:5432/trialscope
+    AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${DB_USER}:${DB_PASS}@postgres:5432/trialscope
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    CLINICALTRIALS_API_URL: https://clinicaltrials.gov/api/v2
+    PUBMED_API_KEY: ${PUBMED_API_KEY}
+    FAERS_API_URL: https://api.fda.gov/drug/event.json
+  volumes:
+    - ./pipeline/dags:/opt/airflow/dags
+    - ./pipeline/extractors:/opt/airflow/extractors
+    - raw-data:/opt/airflow/raw
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks:
+    - trialscope-net
+
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: trialscope
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./warehouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d trialscope"]
+      interval: 10s
+      retries: 5
+    networks:
+      - trialscope-net
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+    networks:
+      - trialscope-net
+
+  # ── Airflow ──────────────────────────────────────────────────────
+  airflow-init:
+    <<: *airflow-common
+    command: bash -c "airflow db upgrade && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@trialscope.local"
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: airflow webserver
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: airflow scheduler
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-worker:
+    <<: *airflow-common
+    command: airflow celery worker
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  # ── dbt ──────────────────────────────────────────────────────────
+  dbt:
+    build: ./warehouse
+    environment:
+      DBT_PROFILES_DIR: /dbt
+      DB_HOST: postgres
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: trialscope
+    volumes:
+      - ./warehouse:/dbt
+      - dbt-logs:/dbt/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - trialscope-net
+    profiles:
+      - dbt  # run manually: docker compose --profile dbt run dbt run
+
+  # ── Research layer ───────────────────────────────────────────────
+  jupyter:
+    build: ./research
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASS}@postgres:5432/trialscope
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - ./research/notebooks:/home/jovyan/work
+      - raw-data:/home/jovyan/raw
+    ports:
+      - "8888:8888"
+    networks:
+      - trialscope-net
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.11.0
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri postgresql://${DB_USER}:${DB_PASS}@postgres:5432/trialscope
+      --default-artifact-root /mlflow/artifacts
+    volumes:
+      - mlflow-artifacts:/mlflow/artifacts
+    ports:
+      - "5001:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - trialscope-net
+
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASS}
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j-data:/data
+    ports:
+      - "7474:7474"   # browser
+      - "7687:7687"   # bolt
+    networks:
+      - trialscope-net
+
+  # ── Application layer ────────────────────────────────────────────
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASS}@postgres:5432/trialscope
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - trialscope-net
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - trialscope-net
+    restart: unless-stopped
+
+volumes:
+  pg-data:
+  raw-data:
+  mlflow-artifacts:
+  neo4j-data:
+  dbt-logs:
+
+networks:
+  trialscope-net:
+    driver: bridge

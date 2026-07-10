@@ -1,0 +1,15 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f7f7f5; --surface: #ffffff; --border: #e4e2db; --border-2: #cccac3;
+  --text-1: #1a1a18; --text-2: #6b6960; --text-3: #9c9a92;
+  --accent: #1a6b4a; --accent-bg: #eaf4ee; --accent-2: #134d35;
+  --warn: #92540a; --warn-bg: #fef3e2; --info: #1a4b8a; --info-bg: #eaf0fb;
+  --danger: #8a1a1a; --danger-bg: #fbeaea;
+  --radius: 6px; --radius-lg: 12px;
+  --mono: 'JetBrains Mono', monospace; --sans: 'Inter', system-ui, sans-serif;
+}
+body { font-family: var(--sans); background: var(--bg); color: var(--text-1); font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; }
+button { font-family: var(--sans); cursor: pointer; border: none; background: none; }
+input, select { font-family: var(--sans); font-size: 14px; color: var(--text-1); background: var(--surface); border: 1px solid var(--border-2); border-radius: var(--radius); padding: 8px 12px; outline: none; transition: border-color .15s; width: 100%; }
+input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,107,74,.1); }

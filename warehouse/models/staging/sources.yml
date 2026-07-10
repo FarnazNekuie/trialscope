@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: clinical_trials
+      - name: faers_events
+      - name: pubmed_abstracts
+
+  - name: ml
+    schema: ml
+    tables:
+      - name: trial_predictions

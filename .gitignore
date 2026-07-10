@@ -1,0 +1,47 @@
+# Environment
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+research/notebooks/.ipynb_checkpoints/
+
+# dbt
+warehouse/target/
+warehouse/logs/
+warehouse/dbt_packages/
+
+# Docker
+.docker/
+
+# Raw data — never commit actual trial data to git
+pipeline/raw/
+raw/
+
+# MLflow local runs (tracked via MLflow server instead)
+mlruns/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

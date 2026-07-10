@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-pipeline:
+    name: Test pipeline extractors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r pipeline/requirements.txt pytest
+
+      - name: Run extractor unit tests
+        run: pytest pipeline/tests/ -v
+
+  test-api:
+    name: Test FastAPI
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: trialscope_test
+          POSTGRES_USER: trialscope
+          POSTGRES_PASSWORD: testpass
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install API deps
+        run: pip install -r api/requirements.txt pytest pytest-asyncio httpx
+
+      - name: Run API tests
+        env:
+          DATABASE_URL: postgresql://trialscope:testpass@localhost:5432/trialscope_test
+        run: pytest api/tests/ -v
+
+  docker-build:
+    name: Verify Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build all images
+        run: docker compose build --parallel
+
+      - name: Smoke test — services start
+        run: |
+          cp .env.example .env
+          docker compose up -d postgres redis
+          sleep 10
+          docker compose exec -T postgres pg_isready -U trialscope
+          docker compose down
