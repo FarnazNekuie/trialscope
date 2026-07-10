@@ -1,16 +1,16 @@
 {
-  "date": "2026-07-10T07:18:19.266829",
+  "date": "2026-07-10T08:03:07.257925",
   "model": "GradientBoostingClassifier",
-  "auc_test": 0.7837,
-  "auc_cv_mean": 0.8053,
-  "auc_cv_std": 0.0379,
-  "accuracy": 0.8333,
-  "n_trials": 570,
+  "auc_test": 0.831,
+  "auc_cv_mean": 0.8402,
+  "auc_cv_std": 0.0064,
+  "accuracy": 0.9224,
+  "n_trials": 25438,
   "n_features": 11,
   "top_3_features": [
     "enrollment_count",
-    "word_count",
-    "entity_count_org"
+    "phase_numeric",
+    "word_count"
   ],
   "finding_1": "Terminated trials have 34% longer eligibility criteria (397 vs 296 words)",
   "finding_2": "Enrollment count is the strongest predictor of trial completion",
