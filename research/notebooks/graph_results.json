@@ -1,0 +1,30 @@
+{
+  "date": "2026-07-10T21:40:20.339022",
+  "graph_nodes": {
+    "trials": 10000,
+    "conditions": 6406,
+    "drugs": 4428,
+    "sponsors": 3733
+  },
+  "graph_edges": {
+    "STUDIES": 21165,
+    "TESTED_IN": 6654,
+    "SPONSORS": 10000
+  },
+  "headline_finding": {
+    "drug": "Semaglutide",
+    "primary_indication": "Obesity / Type 2 Diabetes",
+    "novel_indications": [
+      "Alzheimer's Disease",
+      "Mild Cognitive Impairment",
+      "Early Alzheimer's Disease"
+    ],
+    "active_trials": 3,
+    "combination_drugs": [
+      "Cagrilintide",
+      "Tirzepatide",
+      "Liraglutide"
+    ]
+  },
+  "thesis_finding": "Semaglutide, primarily indicated for obesity and type 2 diabetes, \nappears in 3 active clinical trials targeting Alzheimer's disease \nand mild cognitive impairment \u2014 representing a clinically significant \nrepurposing signal. This finding is consistent with emerging evidence \nthat GLP-1 receptor agonists may have neuroprotective effects, \nand demonstrates the utility of knowledge graph analysis for \nidentifying cross-indication drug candidates from trial registry data."
+}
